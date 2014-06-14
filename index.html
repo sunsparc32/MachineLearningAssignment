@@ -224,7 +224,7 @@ df &lt;- tr1[, colSums(is.na(tr1)) == 0]
 <pre><code>## Error: ggplot2 doesn&#39;t know how to deal with data of class function
 </code></pre>
 
-<p>Notice the nice separation with respect to the index variable, X. This is due to the sequential data ordering and surely we cannot expect the actual test to have the classes so ordered. Hence we remove the first column from our analysis and randomize the row order, just to be sure. We also remove some other columns: those with NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing, but with 160 of them, we can afford to throw some of them away.</p>
+<p>Notice the nice separation with respect to the index variable, X. This is due to the sequential data ordering and surely we cannot expect the actual test to have the classes so ordered. Hence we remove the first column from our analysis and randomize the row order, just to be sure. We also remove some other columns: those with NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing, but with 160 of them, we can afford to throw some of them away. This is a test</p>
 
 <pre><code class="r"># Remove columns with at least one NA in it
 df &lt;- tr1[, colSums(is.na(tr1)) == 0]
