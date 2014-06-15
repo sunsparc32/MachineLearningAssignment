@@ -21,25 +21,11 @@ library(caret)
 library(ggplot2)
 
 # Load the training dataset. Replace blanks with NA
-tr1 <- read.csv("pml-training.csv", header = TRUE, na.strings = c("", "NA"))
-```
-
-```
-## Warning: cannot open file 'pml-training.csv': No such file or directory
-```
-
-```
-## Error: cannot open the connection
-```
-
-```r
+tr1 <- read.csv("~/Google Drive/documents/R/coursera/Practical Machine Learning/Assignment/pml-training.csv", 
+    header = TRUE, na.strings = c("", "NA"))
 
 # Remove columns with at least one NA in it
 df <- tr1[, colSums(is.na(tr1)) == 0]
-```
-
-```
-## Error: object 'tr1' not found
 ```
 
 
@@ -50,9 +36,7 @@ The data in the training set are arranged sequentially, i.e., all "A" classes ar
 qplot(X, roll_belt, data = df, color = classe)
 ```
 
-```
-## Error: ggplot2 doesn't know how to deal with data of class function
-```
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 
 Notice the nice separation with respect to the index variable, X. This is due to the sequential data ordering and surely we cannot expect the actual test to have the classes so ordered. Hence we remove the first column from our analysis and randomize the row order, just to be sure. We also remove some other columns: those with NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing, but with 160 of them, we can afford to throw some of them away.
@@ -61,39 +45,24 @@ Notice the nice separation with respect to the index variable, X. This is due to
 ```r
 # Remove columns with at least one NA in it
 df <- tr1[, colSums(is.na(tr1)) == 0]
-```
-
-```
-## Error: object 'tr1' not found
-```
-
-```r
 # Remove time stamps etc. In particular, remove the first column. There is a
 # strong correlation between the row number and the classe variable !
 df <- df[, c(-1, -2, -3, -4, -5, -6, -7)]
-```
-
-```
-## Error: object of type 'closure' is not subsettable
-```
-
-```r
 
 # Randomize the order
 df <- df[sample(nrow(df)), ]
-```
-
-```
-## Error: object of type 'closure' is not subsettable
-```
-
-```r
 # Use this to check random order and also to make sure that index is gone:
 head(df[, c(1:5, 53)])
 ```
 
 ```
-## Error: object of type 'closure' is not subsettable
+##       roll_belt pitch_belt yaw_belt total_accel_belt gyros_belt_x classe
+## 3215       0.57       5.03   -87.90                5         0.00      A
+## 18871    140.00     -35.20   129.00               16         0.05      E
+## 6478       1.43       7.44   -92.50                3         0.00      B
+## 299      127.00      27.20     0.88               20        -0.37      A
+## 1984       1.60       3.93   -87.70                2        -0.08      A
+## 5411       1.30       5.93   -87.60                3         0.05      A
 ```
 
 

@@ -12,7 +12,7 @@ library(caret)
 library(ggplot2)
 
 # Load the training dataset. Replace blanks with NA
-tr1 <- read.csv("pml-training.csv",header=TRUE, na.strings=c("","NA"))
+tr1 <- read.csv("~/Google Drive/documents/R/coursera/Practical Machine Learning/Assignment/pml-training.csv",header=TRUE, na.strings=c("","NA"))
 
 # Remove columns with at least one NA in it
 df <- tr1[,colSums(is.na(tr1))==0]
