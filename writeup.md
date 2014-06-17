@@ -2,11 +2,11 @@ Classification with KNN Algorithm
 ========================================================
 I used the humble KNN classifier operating on 8 principal components. I was able to achieve about 92% accuracy on the testing set that I created from the training set. On the actual assignment problems, I was able to get 19 correct, leading to a prediction accuracy of 95%. 
 
-I could have achieved, like many in the formums did, 100 % accuracy using a random forest approach, but I did not do this for three reasons: (1) The knn classifier is simple and easy to understand and I was able to understand its mechanics well. I am not as clear on the internal workings of the random forest classifier and I wanted to stick with something that I understood well. (2) The knn classifier took less than 2 minutes to complete on my iMac and (3) It only took me about five hours total to develop the algorithm and write the necessary R code. 
+I could have achieved, like many in the forums did, 100 % accuracy using a random forest approach, but I did not do this for three reasons: (1) The knn classifier is simple and easy to understand and I was able to understand its mechanics well. I am not as clear on the internal workings of the random forest classifier and I wanted to stick with something that I understood well. (2) The knn classifier took less than 2 minutes to complete on my iMac and (3) It only took me about five hours total to develop the algorithm and write the necessary R code. 
 
 Data Preprocesing
 =====================
-First we load the caret package and the ggplot2 package for plotting. Next, we load the training set. Note that blanks are assinged "NA". 
+First we load the caret package and the ggplot2 package for plotting. Next, we load the training set. Note that blanks are assigned "NA". 
 
 ```r
 library(caret)
@@ -31,7 +31,7 @@ df <- tr1[, colSums(is.na(tr1)) == 0]
 ```
 
 
-The data in the training set are arranged sequentially, i.e., all "A" classes are listed first, followed by all "B" classes and so on. This leads to a high correlation between the index variable and classe. This is misleadning and potentially dangerous. For instance, when the {\it roll_belt} variable is plotted against the index number (X), we get the following: 
+The data in the training set are arranged sequentially, i.e., all "A" classes are listed first, followed by all "B" classes and so on. This leads to a high correlation between the index variable and classe. This is misleading and potentially dangerous. For instance, when the {\it roll_belt} variable is plotted against the index number (X), we get the following: 
 
 
 ```r
@@ -89,7 +89,7 @@ modelFit <- train(training$classe ~ ., method = "knn", data = trainPC)
 ```
 
 
-That five nearest neighbors provide the optimum result is found by the train function itself. The following plot shows the decrese in error as a function of the number of nearest neighbors: 
+That five nearest neighbors provide the optimum result is found by the train function itself. The following plot shows the decrease in error as a function of the number of nearest neighbors: 
 
 ```r
 plot(modelFit)
@@ -152,5 +152,7 @@ qplot(x = testPC[, 1], y = testPC[, 2], data = testing)
 ![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
 
 
+When the algorithm is applied to the "real" testing data set in the assignment, I got 18 out of 20 correct. I was able to get a slight improvement by using the bootstrap aggregating method (aka "bagging"). I simply ran the code with different starting seeds and averaged the predictions. This way, accuracy improved to 19/20. 
 
+Like I said in the beginning, it is possible to get 100% accuracy with a random forest approach, but it take a lot longer to run. The algorithm described above needed only 2 minutes to run on my iMac and gave me 95% prediction accuracy. 
 
