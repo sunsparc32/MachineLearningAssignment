@@ -19,6 +19,8 @@ library(caret)
 
 ```r
 library(ggplot2)
+rm(list = ls())
+set.seed(12345)
 
 # Load the training dataset. Replace blanks with NA
 tr1 <- read.csv("~/Google Drive/documents/R/coursera/Practical Machine Learning/Assignment/pml-training.csv", 
@@ -39,7 +41,7 @@ qplot(X, roll_belt, data = df, color = classe)
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 
-Notice the nice separation with respect to the index variable, X. This is due to the sequential data ordering and surely we cannot expect the actual test to have the classes so ordered. Hence we remove the first column from our analysis and randomize the row order, just to be sure. We also remove some other columns: those with NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing, but with 160 of them, we can afford to throw some of them away.
+Notice the nice separation with respect to the index variable, X. This is due to the sequential data ordering and surely we cannot expect the actual test to have the classes so ordered. Hence we remove the first column from our analysis and randomize the row order, just to be sure. 
 
 
 ```r
@@ -57,12 +59,98 @@ head(df[, c(1:5, 53)])
 
 ```
 ##       roll_belt pitch_belt yaw_belt total_accel_belt gyros_belt_x classe
-## 3215       0.57       5.03   -87.90                5         0.00      A
-## 18871    140.00     -35.20   129.00               16         0.05      E
-## 6478       1.43       7.44   -92.50                3         0.00      B
-## 299      127.00      27.20     0.88               20        -0.37      A
-## 1984       1.60       3.93   -87.70                2        -0.08      A
-## 5411       1.30       5.93   -87.60                3         0.05      A
+## 14146      1.58       6.95    -93.6                3         0.03      D
+## 17184    156.00       9.03     39.7               26         0.40      E
+## 14931    124.00     -41.90    165.0               17         0.19      D
+## 17385    133.00      10.60     55.0               18         0.02      E
+## 8956       0.36       2.40    -88.8                3         0.08      B
+## 3264       0.33       5.11    -88.0                5         0.05      A
 ```
+
+We also remove some other columns: those with NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing, but with 160 of them, we can afford to throw some of them away.
+
+Next, we do the usual steps to partition the training data into a training set and a test set: 
+
+```r
+inTrain <- createDataPartition(y = df$classe, p = 0.75, list = FALSE)
+training <- df[inTrain, ]
+testing <- df[-inTrain, ]
+```
+
+
+Algorithm Development and Parameter Estimation
+==============================================
+I used a KNN classifier with n=5 that worked on eight predictors. These eight predictors are the first eight principal components of the training data set. Using eight principal components captures about 95% of the variance. Very little is gained by increasing the number of predictors at this point and doing so only increases the computing time needed for almost no added benefit. The following code does the actual model building: 
+
+```r
+preProc <- preProcess(training[, -53], method = "pca", pcaComp = 8)
+trainPC <- predict(preProc, training[, -53])
+modelFit <- train(training$classe ~ ., method = "knn", data = trainPC)
+```
+
+
+That five nearest neighbors provide the optimum result is found by the train function itself. The following plot shows the decrese in error as a function of the number of nearest neighbors: 
+
+```r
+plot(modelFit)
+```
+
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+
+The train function above applies cross-validation using default bootstrapping method. 
+
+Results
+=======
+The algorithm developed above produced about 92% accuracy for the testing set: 
+
+```r
+testPC <- predict(preProc, testing[, -53])
+confusionMatrix(testing$classe, predict(modelFit, testPC))
+```
+
+```
+## Confusion Matrix and Statistics
+## 
+##           Reference
+## Prediction    A    B    C    D    E
+##          A 1330   18   30   13    4
+##          B   43  847   34   20    5
+##          C   21   25  781   21    7
+##          D   13    6   62  723    0
+##          E   16   11   18   15  841
+## 
+## Overall Statistics
+##                                         
+##                Accuracy : 0.922         
+##                  95% CI : (0.914, 0.929)
+##     No Information Rate : 0.29          
+##     P-Value [Acc > NIR] : < 2e-16       
+##                                         
+##                   Kappa : 0.901         
+##  Mcnemar's Test P-Value : 3.9e-11       
+## 
+## Statistics by Class:
+## 
+##                      Class: A Class: B Class: C Class: D Class: E
+## Sensitivity             0.935    0.934    0.844    0.913    0.981
+## Specificity             0.981    0.974    0.981    0.980    0.985
+## Pos Pred Value          0.953    0.893    0.913    0.899    0.933
+## Neg Pred Value          0.973    0.985    0.964    0.983    0.996
+## Prevalence              0.290    0.185    0.189    0.162    0.175
+## Detection Rate          0.271    0.173    0.159    0.147    0.171
+## Detection Prevalence    0.284    0.194    0.174    0.164    0.184
+## Balanced Accuracy       0.958    0.954    0.913    0.947    0.983
+```
+
+
+Also, when you plot the first two principal components, nice separation into five distinct regions corresponding to the five classes: 
+
+```r
+qplot(x = testPC[, 1], y = testPC[, 2], data = testing)
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
+
+
 
 
