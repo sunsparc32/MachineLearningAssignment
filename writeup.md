@@ -1,8 +1,8 @@
 Classification with KNN Algorithm
 ========================================================
-I used the humble KNN classifier operating on 8 principal components. I was able to achieve about 92% accuracy on the testing set that I created from the training set. On the actual assignment problems, I was able to get 19 correct, leading to a prediction accuracy of 95%. 
+I used the humble KNN classifier operating on 8 principal components. I was able to achieve about 92% accuracy on the testing set that I created from the training set. On the actual assignment problems, I was able to get 19/20 correct, leading to a prediction accuracy of 95%. 
 
-I could have achieved, like many in the forums did, 100 % accuracy using a random forest approach, but I did not do this for three reasons: (1) The knn classifier is simple and easy to understand and I was able to understand its mechanics well. I am not as clear on the internal workings of the random forest classifier and I wanted to stick with something that I understood well. (2) The knn classifier took less than 2 minutes to complete on my iMac and (3) It only took me about five hours total to develop the algorithm and write the necessary R code. 
+I could have achieved, like many in the forums did, 100 % accuracy using a random forest approach; but I did not do this for three reasons: (1) The knn classifier is simple and easy to understand and I was able to understand its mechanics well. I am not as clear on the internal workings and fine details of the random forest classifier and I wanted to stick with something that I understood well. (2) The knn classifier took less than 2 minutes to complete on my iMac and (3) It only took me about five hours total to develop the algorithm and write and test the necessary R code. 
 
 Data Preprocesing
 =====================
@@ -18,9 +18,9 @@ library(caret)
 ```
 
 ```r
-library(ggplot2)
-rm(list = ls())
-set.seed(12345)
+library(ggplot2)  # redundant. caret loads it automatically
+rm(list = ls())  # clear all the variables to start with a clean slate
+set.seed(12345)  # set random seed for reproducibility
 
 # Load the training dataset. Replace blanks with NA
 tr1 <- read.csv("~/Google Drive/documents/R/coursera/Practical Machine Learning/Assignment/pml-training.csv", 
@@ -31,11 +31,11 @@ df <- tr1[, colSums(is.na(tr1)) == 0]
 ```
 
 
-The data in the training set are arranged sequentially, i.e., all "A" classes are listed first, followed by all "B" classes and so on. This leads to a high correlation between the index variable and classe. This is misleading and potentially dangerous. For instance, when the {\it roll_belt} variable is plotted against the index number (X), we get the following: 
+The data in the training set are arranged sequentially, i.e., all "A" classes are listed first, followed by all "B" classes and so on. This leads to a high correlation between the index variable and classe. This is misleading and potentially dangerous. For instance, when the *roll_belt* variable is plotted against the index number (X), we get the following: 
 
 
 ```r
-qplot(X, roll_belt, data = df, color = classe)
+qplot(X, roll_belt, data = df, color = classe, xlab = "row index", ylab = "roll_belt")
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
@@ -67,7 +67,7 @@ head(df[, c(1:5, 53)])
 ## 3264       0.33       5.11    -88.0                5         0.05      A
 ```
 
-We also remove some other columns: those with NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing, but with 160 of them, we can afford to throw some of them away.
+We also remove some other columns: those with at NAs in them, those with the time stamps and so on. There are 160 columns in the raw data and we remove all columns with at least one NA in it. If there are very few predictors, then it may be necessary to do some imputing (again with knn !), but with 160 of them, we can afford to throw some of them away.
 
 Next, we do the usual steps to partition the training data into a training set and a test set: 
 
@@ -83,21 +83,21 @@ Algorithm Development and Parameter Estimation
 I used a KNN classifier with n=5 that worked on eight predictors. These eight predictors are the first eight principal components of the training data set. Using eight principal components captures about 95% of the variance. Very little is gained by increasing the number of predictors at this point and doing so only increases the computing time needed for almost no added benefit. The following code does the actual model building: 
 
 ```r
-preProc <- preProcess(training[, -53], method = "pca", pcaComp = 8)
-trainPC <- predict(preProc, training[, -53])
-modelFit <- train(training$classe ~ ., method = "knn", data = trainPC)
+preProc <- preProcess(training[, -53], method = "pca", pcaComp = 8)  # find principal components
+trainPC <- predict(preProc, training[, -53])  # find principal components
+modelFit <- train(training$classe ~ ., method = "knn", data = trainPC)  # build the prediction model
 ```
 
 
-That five nearest neighbors provide the optimum result is found by the train function itself. The following plot shows the decrease in error as a function of the number of nearest neighbors: 
+That five nearest neighbors provide the optimum result is found by the train function itself. The following plot shows the prediction error as a function of the number of nearest neighbors: 
 
 ```r
-plot(modelFit)
+plot(modelFit, xlab = "number of nearest neighbors", ylab = "prediction accuracy")
 ```
 
 ![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
 
-The train function above applies cross-validation using default bootstrapping method. 
+**Please Note:** The train function above applies cross-validation using default bootstrapping method. 
 
 Results
 =======
@@ -143,16 +143,9 @@ confusionMatrix(testing$classe, predict(modelFit, testPC))
 ```
 
 
-Also, when you plot the first two principal components, nice separation into five distinct regions corresponding to the five classes: 
-
-```r
-qplot(x = testPC[, 1], y = testPC[, 2], data = testing)
-```
-
-![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8.png) 
-
-
 When the algorithm is applied to the "real" testing data set in the assignment, I got 18 out of 20 correct. I was able to get a slight improvement by using the bootstrap aggregating method (aka "bagging"). I simply ran the code with different starting seeds and averaged the predictions. This way, accuracy improved to 19/20. 
 
-Like I said in the beginning, it is possible to get 100% accuracy with a random forest approach, but it take a lot longer to run. The algorithm described above needed only 2 minutes to run on my iMac and gave me 95% prediction accuracy. 
+Like I said in the beginning, it is possible to get 100% accuracy with a random forest approach, but it takes a lot longer to run. The algorithm described above needed less than 2 minutes to run on my iMac and gave me 95% prediction accuracy. 
+
+Thank you for taking the time to grade my work. Please feel free to provide detailed open-ended feedback, including negative feedback. If you feel some part of the coding or algorithm development could be done better, please let me know. 
 
